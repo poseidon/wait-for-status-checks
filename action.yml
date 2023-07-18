@@ -1,0 +1,19 @@
+name: 'wait-for-status-checks'
+description: 'Wait for GitHub Status Checks'
+author: 'poseidon'
+branding:
+  icon: circle
+  color: yellow
+inputs:
+  token:
+    description: 'GitHub token for reading the status check runs'
+    required: true
+  interval:
+    description: 'Interval or period in seconds to poll GitHub Check Runs'
+  timeout:
+    description: 'Timeout in seconds to poll GitHub Check Runs'
+  ignore:
+    description: 'GitHub checks that should be ignored (default ignores the current job)'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

@@ -1,0 +1,17 @@
+name: github-summary
+on:
+  pull_request:
+jobs:
+  all-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Watch GitHub Checks
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
