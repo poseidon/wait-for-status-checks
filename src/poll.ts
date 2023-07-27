@@ -53,7 +53,7 @@ export async function poll(config: Config): Promise<void> {
           pageNumber
         })
         core.info(
-          `Received ${response.data.total_count} check runs on page ${pageNumber}`
+          `Received ${response.data.check_runs.length} check runs on page ${pageNumber}`
         )
         all_check_runs.concat(response.data.check_runs)
         core.info(`Received a total of ${all_check_runs} check runs`)
