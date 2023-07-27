@@ -152,6 +152,8 @@ function poll(config) {
                     });
                     core.info(`Received ${response.data.total_count} check runs on page ${pageNumber}`);
                     all_check_runs.concat(response.data.check_runs);
+                    core.info(`Received a total of ${all_check_runs} check runs`);
+                    yield (0, wait_1.wait)(intervalSeconds * 100);
                 } while (response.data.total_count > all_check_runs.length);
                 core.debug(`Received ${response.data.total_count} total check runs`);
                 // const all_check_runs = response.data.check_runs
