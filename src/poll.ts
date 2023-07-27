@@ -38,15 +38,15 @@ export async function poll(config: Config): Promise<void> {
       // List GitHub Check Runs
       // https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28#list-check-runs-for-a-git-reference
       core.info(`Fetching check runs for ${owner}/${repo}@${ref}`)
-      const response = await client.rest.checks.listForRef({
+      const response = await client.paginate(client.rest.checks.listForRef, {
         owner,
         repo,
         ref,
         per_page: 100
       })
 
-      core.debug(`Received ${response.data.total_count} total check runs`)
-      const all_check_runs = response.data.check_runs
+      core.debug(`Received ${response.total_count} total check runs`)
+      const all_check_runs = response.check_runs
 
       // ignore the current job's check run
       const check_runs = all_check_runs.filter(
