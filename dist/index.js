@@ -150,6 +150,7 @@ function poll(config) {
                         per_page: 100,
                         pageNumber
                     });
+                    core.debug(`Received ${response.data.total_count} check runs on page ${pageNumber}`);
                     all_check_runs.concat(response.data.check_runs);
                 } while (response.data.total_count > all_check_runs.length);
                 core.debug(`Received ${response.data.total_count} total check runs`);
