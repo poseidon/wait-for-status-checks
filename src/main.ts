@@ -1,12 +1,12 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { Context } from '@actions/github/lib/context'
-import { poll } from './poll'
+import {Context} from '@actions/github/lib/context'
+import {poll} from './poll'
 
 async function run(): Promise<void> {
   try {
     // read inputs
-    const token = core.getInput('token', { required: true })
+    const token = core.getInput('token', {required: true})
 
     // github context
     const context = github.context

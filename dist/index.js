@@ -141,7 +141,8 @@ function poll(config) {
                 const response = yield client.rest.checks.listForRef({
                     owner,
                     repo,
-                    ref
+                    ref,
+                    per_page: 100
                 });
                 core.debug(`Received ${response.data.total_count} total check runs`);
                 const all_check_runs = response.data.check_runs;

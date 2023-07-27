@@ -1,6 +1,6 @@
-import { GitHub } from '@actions/github/lib/utils'
+import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
-import { wait } from './wait'
+import {wait} from './wait'
 
 export interface Config {
   client: InstanceType<typeof GitHub>
@@ -41,7 +41,8 @@ export async function poll(config: Config): Promise<void> {
       const response = await client.rest.checks.listForRef({
         owner,
         repo,
-        ref
+        ref,
+        per_page: 100
       })
 
       core.debug(`Received ${response.data.total_count} total check runs`)
@@ -117,14 +118,14 @@ interface CheckRun {
   name: string
   status: string
   conclusion:
-  | (
-    | 'success'
-    | 'failure'
-    | 'neutral'
-    | 'cancelled'
-    | 'skipped'
-    | 'timed_out'
-    | 'action_required'
-  )
-  | null
+    | (
+        | 'success'
+        | 'failure'
+        | 'neutral'
+        | 'cancelled'
+        | 'skipped'
+        | 'timed_out'
+        | 'action_required'
+      )
+    | null
 }
