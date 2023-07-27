@@ -1,7 +1,7 @@
 import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
 import {wait} from './wait'
-import {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods'
+import type {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods'
 
 export interface Config {
   client: InstanceType<typeof GitHub>
@@ -52,7 +52,7 @@ export async function poll(config: Config): Promise<void> {
           per_page: 100,
           pageNumber
         })
-        core.debug(
+        core.info(
           `Received ${response.data.total_count} check runs on page ${pageNumber}`
         )
         all_check_runs.concat(response.data.check_runs)
