@@ -138,14 +138,22 @@ function poll(config) {
                 // List GitHub Check Runs
                 // https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28#list-check-runs-for-a-git-reference
                 core.info(`Fetching check runs for ${owner}/${repo}@${ref}`);
-                const response = yield client.paginate(client.rest.checks.listForRef, {
-                    owner,
-                    repo,
-                    ref,
-                    per_page: 100
-                });
-                core.debug(`Received ${response.total_count} total check runs`);
-                const all_check_runs = response.check_runs;
+                let pageNumber = 0;
+                let response = undefined;
+                const all_check_runs = [];
+                do {
+                    pageNumber++;
+                    response = yield client.rest.checks.listForRef({
+                        owner,
+                        repo,
+                        ref,
+                        per_page: 100,
+                        pageNumber
+                    });
+                    all_check_runs.concat(response.data.check_runs);
+                } while (response.data.total_count > all_check_runs.length);
+                core.debug(`Received ${response.data.total_count} total check runs`);
+                // const all_check_runs = response.data.check_runs
                 // ignore the current job's check run
                 const check_runs = all_check_runs.filter(run => !ignoreChecks.includes(run.name));
                 core.info(`Parse ${check_runs.length} check runs`);
