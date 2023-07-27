@@ -150,7 +150,7 @@ function poll(config) {
                         per_page: 100,
                         pageNumber
                     });
-                    core.info(`Received ${response.data.total_count} check runs on page ${pageNumber}`);
+                    core.info(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
                     all_check_runs.concat(response.data.check_runs);
                     core.info(`Received a total of ${all_check_runs} check runs`);
                     yield (0, wait_1.wait)(intervalSeconds * 100);
