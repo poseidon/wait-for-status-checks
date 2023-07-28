@@ -50,13 +50,15 @@ export async function poll(config: Config): Promise<void> {
           repo,
           ref,
           per_page: 100,
-          pageNumber
+          page: pageNumber
         })
         core.info(
           `Received ${response.data.check_runs.length} check runs on page ${pageNumber}`
         )
         all_check_runs.concat(response.data.check_runs)
-        core.info(`Received a total of ${all_check_runs} check runs`)
+        core.info(
+          `Received a total of ${all_check_runs.length} check runsand expected ${response.data.total_count}`
+        )
         await wait(intervalSeconds * 100)
       } while (response.data.total_count > all_check_runs.length)
 
@@ -73,7 +75,6 @@ export async function poll(config: Config): Promise<void> {
           `> check run "${run.name}" is "${run.status}" with conclusion "${run.conclusion}"`
         )
       }
-      
 
       // exit immediately if any runs completed without success (skipped counts as success)
       const failed = check_runs.filter(run =>

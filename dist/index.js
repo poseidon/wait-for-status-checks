@@ -148,11 +148,11 @@ function poll(config) {
                         repo,
                         ref,
                         per_page: 100,
-                        pageNumber
+                        page: pageNumber
                     });
                     core.info(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
                     all_check_runs.concat(response.data.check_runs);
-                    core.info(`Received a total of ${all_check_runs} check runs`);
+                    core.info(`Received a total of ${all_check_runs.length} check runsand expected ${response.data.total_count}`);
                     yield (0, wait_1.wait)(intervalSeconds * 100);
                 } while (response.data.total_count > all_check_runs.length);
                 core.debug(`Received ${response.data.total_count} total check runs`);
