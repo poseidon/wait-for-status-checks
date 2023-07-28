@@ -151,9 +151,9 @@ function poll(config) {
                         page: pageNumber
                     });
                     totalChecks = response.data.total_count;
-                    core.info(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
+                    core.debug(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
                     all_check_runs = all_check_runs.concat(response.data.check_runs);
-                    core.info(`Received a total of ${all_check_runs.length} check runsand expected ${response.data.total_count}`);
+                    core.debug(`Received a total of ${all_check_runs.length} check runs and expected ${response.data.total_count}`);
                     yield (0, wait_1.wait)(intervalSeconds * 100);
                 } while (totalChecks > all_check_runs.length);
                 core.debug(`Received ${totalChecks} total check runs`);
