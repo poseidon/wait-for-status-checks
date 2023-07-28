@@ -73,6 +73,7 @@ export async function poll(config: Config): Promise<void> {
           `> check run "${run.name}" is "${run.status}" with conclusion "${run.conclusion}"`
         )
       }
+      
 
       // exit immediately if any runs completed without success (skipped counts as success)
       const failed = check_runs.filter(run =>
