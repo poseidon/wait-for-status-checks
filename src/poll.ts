@@ -40,30 +40,32 @@ export async function poll(config: Config): Promise<void> {
       // https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28#list-check-runs-for-a-git-reference
       core.info(`Fetching check runs for ${owner}/${repo}@${ref}`)
       let pageNumber = 0
-      let response = undefined
-      const all_check_runs: RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs'] =
+      let totalChecks = 0
+      let all_check_runs: RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs'] =
         []
       do {
         pageNumber++
-        response = await client.rest.checks.listForRef({
+        const response = await client.rest.checks.listForRef({
           owner,
           repo,
           ref,
           per_page: 100,
           page: pageNumber
         })
+
+        totalChecks = response.data.total_count
+
         core.info(
           `Received ${response.data.check_runs.length} check runs on page ${pageNumber}`
         )
-        all_check_runs.concat(response.data.check_runs)
+        all_check_runs = all_check_runs.concat(response.data.check_runs)
         core.info(
           `Received a total of ${all_check_runs.length} check runsand expected ${response.data.total_count}`
         )
         await wait(intervalSeconds * 100)
-      } while (response.data.total_count > all_check_runs.length)
+      } while (totalChecks > all_check_runs.length)
 
-      core.debug(`Received ${response.data.total_count} total check runs`)
-      // const all_check_runs = response.data.check_runs
+      core.debug(`Received ${totalChecks} total check runs`)
 
       // ignore the current job's check run
       const check_runs = all_check_runs.filter(
