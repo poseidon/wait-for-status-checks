@@ -1,6 +1,7 @@
 import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
 import {wait} from './wait'
+import type {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods'
 
 export interface Config {
   client: InstanceType<typeof GitHub>
@@ -38,15 +39,33 @@ export async function poll(config: Config): Promise<void> {
       // List GitHub Check Runs
       // https://docs.github.com/en/rest/checks/runs?apiVersion=2022-11-28#list-check-runs-for-a-git-reference
       core.info(`Fetching check runs for ${owner}/${repo}@${ref}`)
-      const response = await client.rest.checks.listForRef({
-        owner,
-        repo,
-        ref,
-        per_page: 100
-      })
+      let pageNumber = 0
+      let totalChecks = 0
+      let all_check_runs: RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs'] =
+        []
+      do {
+        pageNumber++
+        const response = await client.rest.checks.listForRef({
+          owner,
+          repo,
+          ref,
+          per_page: 100,
+          page: pageNumber
+        })
 
-      core.debug(`Received ${response.data.total_count} total check runs`)
-      const all_check_runs = response.data.check_runs
+        totalChecks = response.data.total_count
+
+        core.debug(
+          `Received ${response.data.check_runs.length} check runs on page ${pageNumber}`
+        )
+        all_check_runs = all_check_runs.concat(response.data.check_runs)
+        core.debug(
+          `Received a total of ${all_check_runs.length} check runs and expected ${response.data.total_count}`
+        )
+        await wait(intervalSeconds * 100)
+      } while (totalChecks > all_check_runs.length)
+
+      core.debug(`Received ${totalChecks} total check runs`)
 
       // ignore the current job's check run
       const check_runs = all_check_runs.filter(
