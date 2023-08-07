@@ -1,5 +1,7 @@
 # wait-for-status-checks
 [![test](https://github.com/poseidon/wait-for-status-checks/actions/workflows/test.yaml/badge.svg)](https://github.com/poseidon/wait-for-status-checks/actions/workflows/test.yaml)
+[![Sponsors](https://img.shields.io/github/sponsors/poseidon?logo=github)](https://github.com/sponsors/poseidon)
+[![Mastodon](https://img.shields.io/badge/follow-news-6364ff?logo=mastodon)](https://fosstodon.org/@poseidon)
 
 `wait-for-status-checks` is a GitHub Action that polls the GitHub Check Runs on a Pull Request and waits until all runs succeed (or are skipped) or one of them fails. It provides a way to enforce "require _triggered_ checks pass" vs. GitHub's naive "require checks to pass".
 
@@ -45,7 +47,7 @@ jobs:
       checks: read
     steps:
       - name: GitHub Checks
-        uses: poseidon/wait-for-status-checks@v0.1.0
+        uses: poseidon/wait-for-status-checks@v0.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
