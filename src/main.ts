@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {Context} from '@actions/github/lib/context'
 import {poll} from './poll'
+import {wait} from './wait'
 
 async function run(): Promise<void> {
   try {
@@ -16,6 +17,9 @@ async function run(): Promise<void> {
       .split(',')
       .map(check => check.trim())
     ignore.push(context.job)
+
+    const delaySeconds = parseInt(core.getInput('delay') || '0')
+    await wait(delaySeconds * 1000)
 
     await poll({
       client: github.getOctokit(token),
