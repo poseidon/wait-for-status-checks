@@ -8,14 +8,14 @@ inputs:
   token:
     description: 'GitHub token for reading the status check runs'
     required: true
-  delay:
-    description: 'Period in seconds to wait before first poll of GitHub Check Runs'
   interval:
     description: 'Interval or period in seconds to poll GitHub Check Runs'
   timeout:
     description: 'Timeout in seconds to poll GitHub Check Runs'
   ignore:
     description: 'GitHub checks that should be ignored (default ignores the current job)'
+  delay:
+    description: 'Period in seconds to wait before first poll of GitHub Check Runs'
 runs:
   using: 'node16'
   main: 'dist/index.js'
