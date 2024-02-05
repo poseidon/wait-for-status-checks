@@ -8,7 +8,7 @@
 ## Features
 
 * Wait for GitHub Check Runs on a Pull Request
-* Configure the poll `delay`, `interval` and `timeout`
+* Configure the poll `interval`, `timeout` and `delay`
 * Use as a "required check" to monitor other check runs
 
 ## Overview
@@ -54,18 +54,16 @@ jobs:
 
 The action knows to exclude its own check run (i.e. the GitHub Actions job that runs `wait-for-status-check`)
 
-When some of your checks trigger with a delay (e.g. workflow is using `concurrency` and has to wait for previous to be cancelled), then correctly setup `delay` parameter. The action will wait given amount of seconds to let your checks start.
-
 
 ### Inputs
 
 | Input    | Example                     | Default | Description                                                      |
 |----------|-----------------------------|---------|------------------------------------------------------------------|
 | token    | ${{ secrets.GITHUB_TOKEN }} |         | GitHub token with `checks: read`                                 |
-| delay    | 5s                          | 0s      | Period in seconds to wait before first poll of GitHub Check Runs |
 | interval | 10s                         | 10s     | Interval in seconds to poll GitHub Check runs                    |
 | timeout  | 300s                        | 3600s   | Timeout in seconds to poll GitHub Check runs                     |
 | ignore   | foo,bar                     |         | GitHub checks that should be ignored                             |
+| delay    | 5s                          | 0s      | Period in seconds to wait before first poll of GitHub Check Runs |
 
 ## Alternatives
 
