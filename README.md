@@ -8,7 +8,7 @@
 ## Features
 
 * Wait for GitHub Check Runs on a Pull Request
-* Configure the poll `interval` and `timeout`
+* Configure the poll `interval`, `timeout` and `delay`
 * Use as a "required check" to monitor other check runs
 
 ## Overview
@@ -31,7 +31,7 @@ This arises frequently in large repos. For example, a workflow that runs a `go f
 
 ## Usage
 
-`wait-for-status-checks` polls the check runs for the head commit of a Pull Request until they all succeed or one fails. The action monitors check runs at some `interval` until a `timeout` is reached, which makes it a suitable way to enforce that all triggered checks succeeded.
+`wait-for-status-checks` polls the check runs for the head commit of a Pull Request until they all succeed or one fails. The action monitors check runs at some `interval` until a `timeout` is reached, which makes it a suitable way to enforce that all triggered checks succeeded. 
 
 * `success` - All check runs completed as either `success` or `skipped`
 * `failure` - One or more check runs completed as with a non-successful conclusion (e.g. `failure`, `stale`, `timed_out`, `cancelled`)
@@ -54,14 +54,16 @@ jobs:
 
 The action knows to exclude its own check run (i.e. the GitHub Actions job that runs `wait-for-status-check`)
 
+
 ### Inputs
 
-| Input | Example | Default | Description |
-|-------|---------|---------|-------------|
-| token | ${{ secrets.GITHUB_TOKEN }} | | GitHub token with `checks: read` |
-| interval | 10s | 10s | Interval in seconds to poll GitHub Check runs |
-| timeout | 300s | 3600s | Timeout in seconds to poll GitHub Check runs |
-| ignore  | foo,bar | | GitHub checks that should be ignored |
+| Input    | Example                     | Default | Description                                                      |
+|----------|-----------------------------|---------|------------------------------------------------------------------|
+| token    | ${{ secrets.GITHUB_TOKEN }} |         | GitHub token with `checks: read`                                 |
+| interval | 10s                         | 10s     | Interval in seconds to poll GitHub Check runs                    |
+| timeout  | 300s                        | 3600s   | Timeout in seconds to poll GitHub Check runs                     |
+| ignore   | foo,bar                     |         | GitHub checks that should be ignored                             |
+| delay    | 5s                          | 0s      | Period in seconds to wait before first poll of GitHub Check Runs |
 
 ## Alternatives
 

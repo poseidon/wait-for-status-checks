@@ -42,6 +42,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const poll_1 = __nccwpck_require__(5498);
+const wait_1 = __nccwpck_require__(5817);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -54,6 +55,8 @@ function run() {
                 .split(',')
                 .map(check => check.trim());
             ignore.push(context.job);
+            const delaySeconds = parseInt(core.getInput('delay') || '0');
+            yield (0, wait_1.wait)(delaySeconds * 1000);
             yield (0, poll_1.poll)({
                 client: github.getOctokit(token),
                 owner: context.repo.owner,

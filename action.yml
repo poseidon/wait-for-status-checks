@@ -14,6 +14,8 @@ inputs:
     description: 'Timeout in seconds to poll GitHub Check Runs'
   ignore:
     description: 'GitHub checks that should be ignored (default ignores the current job)'
+  delay:
+    description: 'Period in seconds to wait before first poll of GitHub Check Runs'
 runs:
   using: 'node16'
   main: 'dist/index.js'
