@@ -48,6 +48,7 @@ function run() {
         try {
             // read inputs
             const token = core.getInput('token', { required: true });
+            const checkRunPattern = core.getInput('check_run_pattern', { required: false }) || '.*';
             // github context
             const context = github.context;
             // ignore self/current job check run
@@ -63,6 +64,7 @@ function run() {
                 repo: context.repo.repo,
                 ref: pickSHA(context),
                 ignoreChecks: ignore,
+                checkRunPattern: new RegExp(checkRunPattern),
                 // optional
                 intervalSeconds: parseInt(core.getInput('interval') || '10'),
                 timeoutSeconds: parseInt(core.getInput('timeout') || '3600')
@@ -130,12 +132,13 @@ const core = __importStar(__nccwpck_require__(2186));
 const wait_1 = __nccwpck_require__(5817);
 function poll(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { client, owner, repo, ref, intervalSeconds, timeoutSeconds, ignoreChecks } = config;
+        const { client, owner, repo, ref, intervalSeconds, timeoutSeconds, ignoreChecks, checkRunPattern } = config;
         let elapsedSeconds = 0;
         core.info('Starting polling GitHub Check runs...');
         core.info(`timeout: ${timeoutSeconds} seconds`);
         core.info(`interval: ${intervalSeconds} seconds`);
         core.info(`ignore: ${JSON.stringify(ignoreChecks)}`);
+        core.info(`check_run_pattern: ${checkRunPattern.toString()}`);
         while (elapsedSeconds < timeoutSeconds) {
             try {
                 // List GitHub Check Runs
@@ -161,7 +164,7 @@ function poll(config) {
                 } while (totalChecks > all_check_runs.length);
                 core.debug(`Received ${totalChecks} total check runs`);
                 // ignore the current job's check run
-                const check_runs = all_check_runs.filter(run => !ignoreChecks.includes(run.name));
+                const check_runs = all_check_runs.filter(run => !ignoreChecks.includes(run.name) || run.name.match(checkRunPattern));
                 core.info(`Parse ${check_runs.length} check runs`);
                 for (const run of check_runs) {
                     core.debug(`> check run "${run.name}" is "${run.status}" with conclusion "${run.conclusion}"`);

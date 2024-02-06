@@ -8,6 +8,8 @@ async function run(): Promise<void> {
   try {
     // read inputs
     const token = core.getInput('token', {required: true})
+    const checkRunPattern =
+      core.getInput('check_run_pattern', {required: false}) || '.*'
 
     // github context
     const context = github.context
@@ -27,6 +29,7 @@ async function run(): Promise<void> {
       repo: context.repo.repo,
       ref: pickSHA(context),
       ignoreChecks: ignore,
+      checkRunPattern: new RegExp(checkRunPattern),
 
       // optional
       intervalSeconds: parseInt(core.getInput('interval') || '10'),

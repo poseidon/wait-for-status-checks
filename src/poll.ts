@@ -15,6 +15,8 @@ export interface Config {
 
   // ignore
   ignoreChecks: string[]
+  // check run pattern
+  checkRunPattern: RegExp
 }
 
 export async function poll(config: Config): Promise<void> {
@@ -25,7 +27,8 @@ export async function poll(config: Config): Promise<void> {
     ref,
     intervalSeconds,
     timeoutSeconds,
-    ignoreChecks
+    ignoreChecks,
+    checkRunPattern
   } = config
   let elapsedSeconds = 0
 
@@ -33,6 +36,7 @@ export async function poll(config: Config): Promise<void> {
   core.info(`timeout: ${timeoutSeconds} seconds`)
   core.info(`interval: ${intervalSeconds} seconds`)
   core.info(`ignore: ${JSON.stringify(ignoreChecks)}`)
+  core.info(`check_run_pattern: ${checkRunPattern.toString()}`)
 
   while (elapsedSeconds < timeoutSeconds) {
     try {
@@ -69,7 +73,8 @@ export async function poll(config: Config): Promise<void> {
 
       // ignore the current job's check run
       const check_runs = all_check_runs.filter(
-        run => !ignoreChecks.includes(run.name)
+        run =>
+          !ignoreChecks.includes(run.name) || run.name.match(checkRunPattern)
       )
       core.info(`Parse ${check_runs.length} check runs`)
       for (const run of check_runs) {

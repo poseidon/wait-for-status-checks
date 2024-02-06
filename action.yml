@@ -16,6 +16,9 @@ inputs:
     description: 'GitHub checks that should be ignored (default ignores the current job)'
   delay:
     description: 'Period in seconds to wait before first poll of GitHub Check Runs'
+  check_run_pattern:
+    description: 'Pattern to match the check runs'
+    default: '.*'
 runs:
   using: 'node16'
   main: 'dist/index.js'
