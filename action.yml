@@ -17,5 +17,5 @@ inputs:
   delay:
     description: 'Period in seconds to wait before first poll of GitHub Check Runs'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
