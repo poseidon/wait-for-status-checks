@@ -18,6 +18,9 @@ async function run(): Promise<void> {
       .map(check => check.trim())
     ignore.push(context.job)
 
+    const requiredPattern = core.getInput('required_pattern') || undefined
+    const ignoredPattern = core.getInput('ignored_pattern') || undefined
+
     const delaySeconds = parseInt(core.getInput('delay') || '0')
     await wait(delaySeconds * 1000)
 
@@ -27,6 +30,9 @@ async function run(): Promise<void> {
       repo: context.repo.repo,
       ref: pickSHA(context),
       ignoreChecks: ignore,
+
+      requiredPattern,
+      ignoredPattern,
 
       // optional
       intervalSeconds: parseInt(core.getInput('interval') || '10'),
