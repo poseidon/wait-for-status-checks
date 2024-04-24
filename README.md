@@ -57,13 +57,16 @@ The action knows to exclude its own check run (i.e. the GitHub Actions job that 
 
 ### Inputs
 
-| Input    | Example                     | Default | Description                                                      |
-|----------|-----------------------------|---------|------------------------------------------------------------------|
-| token    | ${{ secrets.GITHUB_TOKEN }} |         | GitHub token with `checks: read`                                 |
-| interval | 10s                         | 10s     | Interval in seconds to poll GitHub Check runs                    |
-| timeout  | 300s                        | 3600s   | Timeout in seconds to poll GitHub Check runs                     |
-| ignore   | foo,bar                     |         | GitHub checks that should be ignored                             |
-| delay    | 5s                          | 0s      | Period in seconds to wait before first poll of GitHub Check Runs |
+| Input            | Example                     | Default | Description                                                      |
+|------------------|-----------------------------|---------|------------------------------------------------------------------|
+| token            | ${{ secrets.GITHUB_TOKEN }} |         | GitHub token with `checks: read`                                 |
+| interval         | 10s                         | 10s     | Interval in seconds to poll GitHub Check runs                    |
+| timeout          | 300s                        | 3600s   | Timeout in seconds to poll GitHub Check runs                     |
+| ignore           | foo,bar                     |         | GitHub checks that should be ignored                             |
+| delay            | 5s                          | 0s      | Period in seconds to wait before first poll of GitHub Check Runs |
+| required_pattern | *-prod                      |         | Regex for checks that are required                               |
+| ignored_pattern  | *-lint                      |         | Regex for checks that can be ignored                             |
+
 
 ## Alternatives
 
