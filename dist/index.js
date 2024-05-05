@@ -55,8 +55,8 @@ function run() {
                 .split(',')
                 .map(check => check.trim());
             ignore.push(context.job);
-            const requiredPattern = core.getInput('required_pattern') || undefined;
-            const ignoredPattern = core.getInput('ignored_pattern') || undefined;
+            const matchPattern = core.getInput('match_pattern') || undefined;
+            const ignorePattern = core.getInput('ignore_pattern') || undefined;
             const delaySeconds = parseInt(core.getInput('delay') || '0');
             yield (0, wait_1.wait)(delaySeconds * 1000);
             yield (0, poll_1.poll)({
@@ -65,8 +65,8 @@ function run() {
                 repo: context.repo.repo,
                 ref: pickSHA(context),
                 ignoreChecks: ignore,
-                requiredPattern,
-                ignoredPattern,
+                matchPattern,
+                ignorePattern,
                 // optional
                 intervalSeconds: parseInt(core.getInput('interval') || '10'),
                 timeoutSeconds: parseInt(core.getInput('timeout') || '3600')
@@ -134,17 +134,17 @@ const core = __importStar(__nccwpck_require__(2186));
 const wait_1 = __nccwpck_require__(5817);
 function poll(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { client, owner, repo, ref, intervalSeconds, timeoutSeconds, ignoreChecks, requiredPattern, ignoredPattern } = config;
+        const { client, owner, repo, ref, intervalSeconds, timeoutSeconds, ignoreChecks, matchPattern, ignorePattern } = config;
         let elapsedSeconds = 0;
         core.info('Starting polling GitHub Check runs...');
         core.info(`timeout: ${timeoutSeconds} seconds`);
         core.info(`interval: ${intervalSeconds} seconds`);
         core.info(`ignore: ${JSON.stringify(ignoreChecks)}`);
-        if (requiredPattern) {
-            core.info(`required pattern: ${requiredPattern}`);
+        if (matchPattern) {
+            core.info(`match pattern: ${matchPattern}`);
         }
-        if (ignoredPattern) {
-            core.info(`ignored pattern: ${ignoredPattern}`);
+        if (ignorePattern) {
+            core.info(`ignore pattern: ${ignorePattern}`);
         }
         while (elapsedSeconds < timeoutSeconds) {
             try {
@@ -172,16 +172,16 @@ function poll(config) {
                 core.debug(`Received ${totalChecks} total check runs`);
                 // ignore the current job's check run
                 let check_runs = all_check_runs.filter(run => !ignoreChecks.includes(run.name));
-                // filter by required pattern
-                if (requiredPattern) {
-                    core.debug(`Filtering check runs by required pattern: ${requiredPattern}`);
-                    const pattern = new RegExp(requiredPattern);
+                // filter by match pattern
+                if (matchPattern) {
+                    core.debug(`Filtering check runs by match pattern: ${matchPattern}`);
+                    const pattern = new RegExp(matchPattern);
                     check_runs = check_runs.filter(run => pattern.test(run.name));
                 }
-                // filter by ignored pattern
-                if (ignoredPattern) {
-                    core.debug(`Filtering check runs by ignored pattern: ${ignoredPattern}`);
-                    const pattern = new RegExp(ignoredPattern);
+                // filter by ignore pattern
+                if (ignorePattern) {
+                    core.debug(`Filtering check runs by ignore pattern: ${ignorePattern}`);
+                    const pattern = new RegExp(ignorePattern);
                     check_runs = check_runs.filter(run => !pattern.test(run.name));
                 }
                 core.info(`Parse ${check_runs.length} check runs`);

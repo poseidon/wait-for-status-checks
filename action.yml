@@ -12,10 +12,14 @@ inputs:
     description: 'Interval or period in seconds to poll GitHub Check Runs'
   timeout:
     description: 'Timeout in seconds to poll GitHub Check Runs'
-  ignore:
-    description: 'GitHub checks that should be ignored (default ignores the current job)'
   delay:
     description: 'Period in seconds to wait before first poll of GitHub Check Runs'
+  match_pattern:
+    description: 'Regex match GitHub checks that should be watched'
+  ignore_pattern:
+    description: 'Regex match GitHub checks that should be ignored'
+  ignore:
+    description: 'GitHub checks that should be ignored (default ignores the current job)'
 runs:
   using: 'node20'
   main: 'dist/index.js'

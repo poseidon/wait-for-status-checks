@@ -16,8 +16,8 @@ export interface Config {
   // ignore
   ignoreChecks: string[]
 
-  requiredPattern?: string
-  ignoredPattern?: string
+  matchPattern?: string
+  ignorePattern?: string
 }
 
 export async function poll(config: Config): Promise<void> {
@@ -29,8 +29,8 @@ export async function poll(config: Config): Promise<void> {
     intervalSeconds,
     timeoutSeconds,
     ignoreChecks,
-    requiredPattern,
-    ignoredPattern
+    matchPattern,
+    ignorePattern
   } = config
   let elapsedSeconds = 0
 
@@ -39,11 +39,11 @@ export async function poll(config: Config): Promise<void> {
   core.info(`interval: ${intervalSeconds} seconds`)
   core.info(`ignore: ${JSON.stringify(ignoreChecks)}`)
 
-  if (requiredPattern) {
-    core.info(`required pattern: ${requiredPattern}`)
+  if (matchPattern) {
+    core.info(`match pattern: ${matchPattern}`)
   }
-  if (ignoredPattern) {
-    core.info(`ignored pattern: ${ignoredPattern}`)
+  if (ignorePattern) {
+    core.info(`ignore pattern: ${ignorePattern}`)
   }
 
   while (elapsedSeconds < timeoutSeconds) {
@@ -84,19 +84,17 @@ export async function poll(config: Config): Promise<void> {
         run => !ignoreChecks.includes(run.name)
       )
 
-      // filter by required pattern
-      if (requiredPattern) {
-        core.debug(
-          `Filtering check runs by required pattern: ${requiredPattern}`
-        )
-        const pattern = new RegExp(requiredPattern)
+      // filter by match pattern
+      if (matchPattern) {
+        core.debug(`Filtering check runs by match pattern: ${matchPattern}`)
+        const pattern = new RegExp(matchPattern)
         check_runs = check_runs.filter(run => pattern.test(run.name))
       }
 
-      // filter by ignored pattern
-      if (ignoredPattern) {
-        core.debug(`Filtering check runs by ignored pattern: ${ignoredPattern}`)
-        const pattern = new RegExp(ignoredPattern)
+      // filter by ignore pattern
+      if (ignorePattern) {
+        core.debug(`Filtering check runs by ignore pattern: ${ignorePattern}`)
+        const pattern = new RegExp(ignorePattern)
         check_runs = check_runs.filter(run => !pattern.test(run.name))
       }
 

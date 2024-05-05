@@ -31,7 +31,7 @@ This arises frequently in large repos. For example, a workflow that runs a `go f
 
 ## Usage
 
-`wait-for-status-checks` polls the check runs for the head commit of a Pull Request until they all succeed or one fails. The action monitors check runs at some `interval` until a `timeout` is reached, which makes it a suitable way to enforce that all triggered checks succeeded. 
+`wait-for-status-checks` polls the check runs for the head commit of a Pull Request until they all succeed or one fails. The action monitors check runs at some `interval` until a `timeout` is reached, which makes it a suitable way to enforce that all triggered checks succeeded.
 
 * `success` - All check runs completed as either `success` or `skipped`
 * `failure` - One or more check runs completed as with a non-successful conclusion (e.g. `failure`, `stale`, `timed_out`, `cancelled`)
@@ -47,13 +47,12 @@ jobs:
       checks: read
     steps:
       - name: GitHub Checks
-        uses: poseidon/wait-for-status-checks@v0.3.0
+        uses: poseidon/wait-for-status-checks@v0.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 The action knows to exclude its own check run (i.e. the GitHub Actions job that runs `wait-for-status-check`)
-
 
 ### Inputs
 
@@ -62,11 +61,10 @@ The action knows to exclude its own check run (i.e. the GitHub Actions job that 
 | token            | ${{ secrets.GITHUB_TOKEN }} |         | GitHub token with `checks: read`                                 |
 | interval         | 10s                         | 10s     | Interval in seconds to poll GitHub Check runs                    |
 | timeout          | 300s                        | 3600s   | Timeout in seconds to poll GitHub Check runs                     |
-| ignore           | foo,bar                     |         | GitHub checks that should be ignored                             |
 | delay            | 5s                          | 0s      | Period in seconds to wait before first poll of GitHub Check Runs |
-| required_pattern | *-prod                      |         | Regex for checks that are required                               |
-| ignored_pattern  | *-lint                      |         | Regex for checks that can be ignored                             |
-
+| match_pattern    | prod.*                      |         | Regex match GitHub checks that should be watched                 |
+| ignore_pattern   | lint.*                      |         | Regex match GitHub checks that should be ignored                 |
+| ignore           | foo,bar                     |         | GitHub checks that should be ignored                             |
 
 ## Alternatives
 

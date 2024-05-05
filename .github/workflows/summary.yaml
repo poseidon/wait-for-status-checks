@@ -16,3 +16,6 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          delay: 5s
+          #match_pattern: test.*
+          #ignore_pattern: lint.*
