@@ -148,7 +148,9 @@ export async function poll(config: Config): Promise<void> {
     await wait(intervalSeconds * 1000)
   }
 
-  core.info(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`)
+  core.setFailed(
+    `elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`
+  )
 }
 
 function isFailure(run: CheckRun): boolean {

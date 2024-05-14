@@ -224,7 +224,7 @@ function poll(config) {
             elapsedSeconds += intervalSeconds;
             yield (0, wait_1.wait)(intervalSeconds * 1000);
         }
-        core.info(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`);
+        core.setFailed(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`);
     });
 }
 exports.poll = poll;
