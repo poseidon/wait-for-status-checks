@@ -55,24 +55,41 @@ export async function poll(config: Config): Promise<void> {
       let totalChecks = 0
       let all_check_runs: RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs'] =
         []
+      let all_commit_statuses = []
       do {
         pageNumber++
-        const response = await client.rest.checks.listForRef({
+        const checksResponse = await client.rest.checks.listForRef({
           owner,
           repo,
           ref,
           per_page: 100,
           page: pageNumber
         })
+        const statusesResponse = await client.rest.repo.listCommitStatusesForRef({
+          owner,
+          repo,
+          ref,
+        })
 
-        totalChecks = response.data.total_count
+        totalChecks = checksResponse.data.total_count
+        // totalStatuses = statusesResponse.data.total_count
 
         core.debug(
-          `Received ${response.data.check_runs.length} check runs on page ${pageNumber}`
+          `Received ${checksResponse.data.check_runs.length} check runs on page ${pageNumber}`
         )
-        all_check_runs = all_check_runs.concat(response.data.check_runs)
         core.debug(
-          `Received a total of ${all_check_runs.length} check runs and expected ${response.data.total_count}`
+          `Received ${statusesResponse.data.check_runs.length} check runs on page ${pageNumber}`
+        )
+        all_check_runs = all_check_runs.concat(checksResponse.data.check_runs)
+
+        core.debug(`statuses response:`)
+        core.debug(statusesResponse)
+
+        core.debug(
+          `Received a total of ${all_check_runs.length} check runs and expected ${checksResponse.data.total_count}`
+        )
+        core.debug(
+          `Received a total of ${all_check_runs.length} check runs and expected ${statusesResponse.data.total_count}`
         )
         await wait(intervalSeconds * 100)
       } while (totalChecks > all_check_runs.length)
