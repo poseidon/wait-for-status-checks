@@ -167,7 +167,7 @@ function poll(config) {
                     core.debug(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
                     all_check_runs = all_check_runs.concat(response.data.check_runs);
                     core.debug(`Received a total of ${all_check_runs.length} check runs and expected ${response.data.total_count}`);
-                    yield (0, wait_1.wait)(intervalSeconds * 100);
+                    yield (0, wait_1.wait)(intervalSeconds * 1000);
                 } while (totalChecks > all_check_runs.length);
                 core.debug(`Received ${totalChecks} total check runs`);
                 // ignore the current job's check run

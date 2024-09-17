@@ -74,7 +74,7 @@ export async function poll(config: Config): Promise<void> {
         core.debug(
           `Received a total of ${all_check_runs.length} check runs and expected ${response.data.total_count}`
         )
-        await wait(intervalSeconds * 100)
+        await wait(intervalSeconds * 1000)
       } while (totalChecks > all_check_runs.length)
 
       core.debug(`Received ${totalChecks} total check runs`)
