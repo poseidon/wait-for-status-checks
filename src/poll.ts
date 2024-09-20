@@ -84,6 +84,10 @@ export async function poll(config: Config): Promise<void> {
         run => !ignoreChecks.includes(run.name)
       )
 
+      // ignore checks that don't match an open PR
+      // this ensures that stale checks (e.g., from closed PRs) are ignored
+      check_runs = check_runs.filter(run => run.pull_requests.length > 0)
+
       // filter by match pattern
       if (matchPattern) {
         core.debug(`Filtering check runs by match pattern: ${matchPattern}`)
