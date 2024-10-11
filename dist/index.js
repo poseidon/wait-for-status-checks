@@ -81,10 +81,15 @@ function run() {
 }
 function pickSHA(context) {
     var _a;
-    if (context.eventName === 'pull_request') {
-        return ((_a = context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.sha) || context.sha;
+    switch (context.eventName) {
+        case 'pull_request':
+        case 'pull_request_target':
+            return ((_a = context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.sha) || context.sha;
+        case 'push':
+            return context.payload.after || context.sha;
+        default:
+            return context.sha;
     }
-    return context.sha;
 }
 run();
 
