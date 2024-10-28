@@ -47,7 +47,7 @@ jobs:
       checks: read
     steps:
       - name: GitHub Checks
-        uses: poseidon/wait-for-status-checks@v0.4.1
+        uses: poseidon/wait-for-status-checks@v0.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
