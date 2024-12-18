@@ -155,6 +155,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.poll = poll;
+exports.filterCheckRuns = filterCheckRuns;
 const core = __importStar(__nccwpck_require__(7484));
 const wait_1 = __nccwpck_require__(6339);
 function poll(config) {
@@ -195,20 +196,7 @@ function poll(config) {
                     yield (0, wait_1.wait)(intervalSeconds * 1000);
                 } while (totalChecks > all_check_runs.length);
                 core.debug(`Received ${totalChecks} total check runs`);
-                // ignore the current job's check run
-                let check_runs = all_check_runs.filter(run => !ignoreChecks.includes(run.name));
-                // filter by match pattern
-                if (matchPattern) {
-                    core.debug(`Filtering check runs by match pattern: ${matchPattern}`);
-                    const pattern = new RegExp(matchPattern);
-                    check_runs = check_runs.filter(run => pattern.test(run.name));
-                }
-                // filter by ignore pattern
-                if (ignorePattern) {
-                    core.debug(`Filtering check runs by ignore pattern: ${ignorePattern}`);
-                    const pattern = new RegExp(ignorePattern);
-                    check_runs = check_runs.filter(run => !pattern.test(run.name));
-                }
+                let check_runs = filterCheckRuns(all_check_runs, matchPattern, ignoreChecks, ignorePattern);
                 core.info(`Parse ${check_runs.length} check runs`);
                 for (const run of check_runs) {
                     core.debug(`> check run "${run.name}" is "${run.status}" with conclusion "${run.conclusion}"`);
@@ -216,6 +204,7 @@ function poll(config) {
                 // exit immediately if any runs completed without success (skipped counts as success)
                 const failed = check_runs.filter(run => isFailure({
                     name: run.name,
+                    started_at: run.started_at,
                     status: run.status,
                     conclusion: run.conclusion
                 }));
@@ -251,6 +240,31 @@ function poll(config) {
         }
         core.setFailed(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`);
     });
+}
+function filterCheckRuns(runs, matchPattern, ignoreChecks, ignorePattern) {
+    // ignore the current job's check run
+    let checkRuns = runs.filter(run => !ignoreChecks.includes(run.name));
+    // filter by match pattern
+    if (matchPattern) {
+        core.debug(`Filtering check runs by match pattern: ${matchPattern}`);
+        const pattern = new RegExp(matchPattern);
+        checkRuns = checkRuns.filter(run => pattern.test(run.name));
+    }
+    // filter by ignore pattern
+    if (ignorePattern) {
+        core.debug(`Filtering check runs by ignore pattern: ${ignorePattern}`);
+        const pattern = new RegExp(ignorePattern);
+        checkRuns = checkRuns.filter(run => !pattern.test(run.name));
+    }
+    // filter by latest run to avoid reporting failures for checks
+    // that are triggered for the same SHA (ex.: pull_request.edited).
+    let checkRunsByName = checkRuns.reduce((map, check) => {
+        if (!map.has(check.name) || new Date(check.started_at || '') > new Date(map.get(check.name).started_at || '')) {
+            map.set(check.name, check);
+        }
+        return map;
+    }, new Map());
+    return [...checkRunsByName.values()];
 }
 function isFailure(run) {
     if (run.status === 'completed') {
