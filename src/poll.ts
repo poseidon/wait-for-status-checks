@@ -98,6 +98,16 @@ export async function poll(config: Config): Promise<void> {
         check_runs = check_runs.filter(run => !pattern.test(run.name))
       }
 
+      // filter by latest run to avoid reporting failures for checks
+      // that are triggered for the same SHA (ex.: pull_request.edited).
+      const checksByName = check_runs.reduce<Map<string, CheckRun>>((map, check) => {
+        if (!map.has(check.name) || new Date(check.started_at || '') > new Date(map.get(check.name)!.started_at || '')) {
+          map.set(check.name, check);
+        }
+        return map;
+      }, new Map<string, CheckRun>());
+      check_runs = Object.values(checksByName)
+
       core.info(`Parse ${check_runs.length} check runs`)
       for (const run of check_runs) {
         core.debug(
@@ -109,6 +119,7 @@ export async function poll(config: Config): Promise<void> {
       const failed = check_runs.filter(run =>
         isFailure({
           name: run.name,
+          started_at: run.started_at,
           status: run.status,
           conclusion: run.conclusion
         })
@@ -164,6 +175,7 @@ function isFailure(run: CheckRun): boolean {
 
 interface CheckRun {
   name: string
+  started_at: string | null
   status: string
   conclusion:
     | (
