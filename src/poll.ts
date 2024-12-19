@@ -79,24 +79,7 @@ export async function poll(config: Config): Promise<void> {
 
       core.debug(`Received ${totalChecks} total check runs`)
 
-      // ignore the current job's check run
-      let check_runs = all_check_runs.filter(
-        run => !ignoreChecks.includes(run.name)
-      )
-
-      // filter by match pattern
-      if (matchPattern) {
-        core.debug(`Filtering check runs by match pattern: ${matchPattern}`)
-        const pattern = new RegExp(matchPattern)
-        check_runs = check_runs.filter(run => pattern.test(run.name))
-      }
-
-      // filter by ignore pattern
-      if (ignorePattern) {
-        core.debug(`Filtering check runs by ignore pattern: ${ignorePattern}`)
-        const pattern = new RegExp(ignorePattern)
-        check_runs = check_runs.filter(run => !pattern.test(run.name))
-      }
+      let check_runs = filterCheckRuns(all_check_runs, matchPattern, ignoreChecks, ignorePattern)
 
       core.info(`Parse ${check_runs.length} check runs`)
       for (const run of check_runs) {
@@ -109,6 +92,7 @@ export async function poll(config: Config): Promise<void> {
       const failed = check_runs.filter(run =>
         isFailure({
           name: run.name,
+          started_at: run.started_at,
           status: run.status,
           conclusion: run.conclusion
         })
@@ -153,6 +137,43 @@ export async function poll(config: Config): Promise<void> {
   )
 }
 
+export function filterCheckRuns(
+  runs: CheckRun[],
+  matchPattern: string | undefined,
+  ignoreChecks: string[],
+  ignorePattern: string | undefined,
+): CheckRun[] {
+  // ignore the current job's check run
+  let checkRuns = runs.filter(
+    run => !ignoreChecks.includes(run.name)
+  )
+
+  // filter by match pattern
+  if (matchPattern) {
+    core.debug(`Filtering check runs by match pattern: ${matchPattern}`)
+    const pattern = new RegExp(matchPattern)
+    checkRuns = checkRuns.filter(run => pattern.test(run.name))
+  }
+
+  // filter by ignore pattern
+  if (ignorePattern) {
+    core.debug(`Filtering check runs by ignore pattern: ${ignorePattern}`)
+    const pattern = new RegExp(ignorePattern)
+    checkRuns = checkRuns.filter(run => !pattern.test(run.name))
+  }
+
+  // filter by latest run to avoid reporting failures for checks
+  // that are triggered for the same SHA (ex.: pull_request.edited).
+  let checkRunsByName = checkRuns.reduce<Map<string, CheckRun>>((map, check) => {
+    if (!map.has(check.name) || new Date(check.started_at || '') > new Date(map.get(check.name)!.started_at || '')) {
+      map.set(check.name, check);
+    }
+    return map;
+  }, new Map<string, CheckRun>());
+
+  return [...checkRunsByName.values()]
+}
+
 function isFailure(run: CheckRun): boolean {
   if (run.status === 'completed') {
     // all conclusions besides success or skipped are considered failures
@@ -162,8 +183,9 @@ function isFailure(run: CheckRun): boolean {
   return false
 }
 
-interface CheckRun {
+export interface CheckRun {
   name: string
+  started_at: string | null
   status: string
   conclusion:
     | (
