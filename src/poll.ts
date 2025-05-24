@@ -1,7 +1,7 @@
-import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {GitHub} from '@actions/github/lib/utils'
 import type {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods'
+import {wait} from './wait'
 
 export interface Config {
   client: InstanceType<typeof GitHub>
@@ -62,7 +62,8 @@ export async function poll(config: Config): Promise<void> {
           repo,
           ref,
           per_page: 100,
-          page: pageNumber
+          page: pageNumber,
+          filter: 'latest'
         })
 
         totalChecks = response.data.total_count
