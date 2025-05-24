@@ -186,8 +186,7 @@ function poll(config) {
                         repo,
                         ref,
                         per_page: 100,
-                        page: pageNumber,
-                        filter: 'latest'
+                        page: pageNumber
                     });
                     totalChecks = response.data.total_count;
                     core.debug(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
@@ -196,8 +195,10 @@ function poll(config) {
                     yield (0, wait_1.wait)(intervalSeconds * 1000);
                 } while (totalChecks > all_check_runs.length);
                 core.debug(`Received ${totalChecks} total check runs`);
+                const latest_check_runs = filterLatestCheckRunResults(all_check_runs);
+                core.debug(`Filtered latest runs count ${latest_check_runs.length}`);
                 // ignore the current job's check run
-                let check_runs = all_check_runs.filter(run => !ignoreChecks.includes(run.name));
+                let check_runs = latest_check_runs.filter(run => !ignoreChecks.includes(run.name));
                 // filter by match pattern
                 if (matchPattern) {
                     core.debug(`Filtering check runs by match pattern: ${matchPattern}`);
@@ -252,6 +253,20 @@ function poll(config) {
         }
         core.setFailed(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`);
     });
+}
+function filterLatestCheckRunResults(runs) {
+    return runs.reduce((acc, check) => {
+        const existing = acc.find(c => c.name === check.name);
+        if (!existing) {
+            acc.push(check);
+            return acc;
+        }
+        if (new Date(check.started_at || 0) > new Date(existing.started_at || 0)) {
+            acc = acc.filter(c => c.name !== check.name);
+            acc.push(check);
+        }
+        return acc;
+    }, []);
 }
 function isFailure(run) {
     if (run.status === 'completed') {
