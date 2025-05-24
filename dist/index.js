@@ -186,7 +186,8 @@ function poll(config) {
                         repo,
                         ref,
                         per_page: 100,
-                        page: pageNumber
+                        page: pageNumber,
+                        filter: 'latest'
                     });
                     totalChecks = response.data.total_count;
                     core.debug(`Received ${response.data.check_runs.length} check runs on page ${pageNumber}`);
