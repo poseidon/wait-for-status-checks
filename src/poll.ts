@@ -1,7 +1,7 @@
-import {GitHub} from '@actions/github/lib/utils'
 import * as core from '@actions/core'
-import {wait} from './wait'
+import {GitHub} from '@actions/github/lib/utils'
 import type {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods'
+import {wait} from './wait'
 
 export interface Config {
   client: InstanceType<typeof GitHub>
@@ -79,8 +79,11 @@ export async function poll(config: Config): Promise<void> {
 
       core.debug(`Received ${totalChecks} total check runs`)
 
+      const latest_check_runs = filterLatestCheckRunResults(all_check_runs)
+      core.debug(`Filtered latest runs count ${latest_check_runs.length}`)
+
       // ignore the current job's check run
-      let check_runs = all_check_runs.filter(
+      let check_runs = latest_check_runs.filter(
         run => !ignoreChecks.includes(run.name)
       )
 
@@ -150,6 +153,30 @@ export async function poll(config: Config): Promise<void> {
 
   core.setFailed(
     `elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`
+  )
+}
+
+function filterLatestCheckRunResults(
+  runs: RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs']
+): RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs'] {
+  return runs.reduce(
+    (acc, check) => {
+      const existing = acc.find(c => c.name === check.name)
+
+      if (!existing) {
+        acc.push(check)
+        return acc
+      }
+
+      if (
+        new Date(check.started_at || 0) > new Date(existing.started_at || 0)
+      ) {
+        acc = acc.filter(c => c.name !== check.name)
+        acc.push(check)
+      }
+      return acc
+    },
+    [] as RestEndpointMethodTypes['checks']['listForRef']['response']['data']['check_runs']
   )
 }
 
