@@ -116,11 +116,14 @@ export async function poll(config: Config): Promise<void> {
 
       // exit immediately if any runs completed without success (skipped counts as success)
       const failed = check_runs.filter(run =>
-        isFailure({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion
-        }, successConclusions)
+        isFailure(
+          {
+            name: run.name,
+            status: run.status,
+            conclusion: run.conclusion
+          },
+          successConclusions
+        )
       )
       if (failed.length > 0) {
         core.info('One or more watched check runs were not successful')
@@ -159,18 +162,20 @@ export async function poll(config: Config): Promise<void> {
 
   // Handle timeout based on configured behavior
   core.info(`Timeout reached after ${elapsedSeconds} seconds`)
-  
+
   switch (timeoutBehavior) {
     case 'fail':
       core.setFailed(
         `elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`
       )
       break
-      
+
     case 'success':
-      core.info('Timeout behavior set to "success" - treating timeout as successful completion')
+      core.info(
+        'Timeout behavior set to "success" - treating timeout as successful completion'
+      )
       break
-      
+
     default:
       core.setFailed(`Unknown timeout behavior: ${timeoutBehavior}`)
   }
