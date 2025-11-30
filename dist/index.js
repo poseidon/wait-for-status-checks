@@ -67,6 +67,30 @@ function run() {
             ignore.push(context.job);
             const matchPattern = core.getInput('match_pattern') || undefined;
             const ignorePattern = core.getInput('ignore_pattern') || undefined;
+            const successConclusions = (core.getInput('success_conclusions') || 'success,skipped')
+                .split(',')
+                .map(conclusion => conclusion.trim())
+                .filter(conclusion => conclusion.length > 0); // Remove empty strings
+            // Validate success_conclusions values
+            const validConclusions = [
+                'success',
+                'failure',
+                'neutral',
+                'cancelled',
+                'skipped',
+                'timed_out',
+                'action_required'
+            ];
+            const invalidConclusions = successConclusions.filter(conclusion => !validConclusions.includes(conclusion));
+            if (invalidConclusions.length > 0) {
+                throw new Error(`Invalid success_conclusions: ${invalidConclusions.join(', ')}. Valid values: ${validConclusions.join(', ')}`);
+            }
+            const timeoutBehaviorInput = core.getInput('timeout_behavior') || 'fail';
+            const validTimeoutBehaviors = ['fail', 'success'];
+            if (!validTimeoutBehaviors.includes(timeoutBehaviorInput)) {
+                throw new Error(`Invalid timeout_behavior: ${timeoutBehaviorInput}. Valid values: ${validTimeoutBehaviors.join(', ')}`);
+            }
+            const timeoutBehavior = timeoutBehaviorInput;
             const delaySeconds = parseInt(core.getInput('delay') || '0');
             yield (0, wait_1.wait)(delaySeconds * 1000);
             yield (0, poll_1.poll)({
@@ -75,6 +99,8 @@ function run() {
                 repo: context.repo.repo,
                 ref: pickSHA(context),
                 ignoreChecks: ignore,
+                successConclusions,
+                timeoutBehavior,
                 matchPattern,
                 ignorePattern,
                 // optional
@@ -159,7 +185,7 @@ const core = __importStar(__nccwpck_require__(7484));
 const wait_1 = __nccwpck_require__(6339);
 function poll(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { client, owner, repo, ref, intervalSeconds, timeoutSeconds, ignoreChecks, matchPattern, ignorePattern } = config;
+        const { client, owner, repo, ref, intervalSeconds, timeoutSeconds, timeoutBehavior, ignoreChecks, successConclusions, matchPattern, ignorePattern } = config;
         let elapsedSeconds = 0;
         core.info('Starting polling GitHub Check runs...');
         core.info(`timeout: ${timeoutSeconds} seconds`);
@@ -220,7 +246,7 @@ function poll(config) {
                     name: run.name,
                     status: run.status,
                     conclusion: run.conclusion
-                }));
+                }, successConclusions));
                 if (failed.length > 0) {
                     core.info('One or more watched check runs were not successful');
                     for (const run of failed) {
@@ -251,7 +277,18 @@ function poll(config) {
             elapsedSeconds += intervalSeconds;
             yield (0, wait_1.wait)(intervalSeconds * 1000);
         }
-        core.setFailed(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`);
+        // Handle timeout based on configured behavior
+        core.info(`Timeout reached after ${elapsedSeconds} seconds`);
+        switch (timeoutBehavior) {
+            case 'fail':
+                core.setFailed(`elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`);
+                break;
+            case 'success':
+                core.info('Timeout behavior set to "success" - treating timeout as successful completion');
+                break;
+            default:
+                core.setFailed(`Unknown timeout behavior: ${timeoutBehavior}`);
+        }
     });
 }
 function filterLatestCheckRunResults(runs) {
@@ -268,10 +305,10 @@ function filterLatestCheckRunResults(runs) {
         return acc;
     }, []);
 }
-function isFailure(run) {
+function isFailure(run, successConclusions) {
     if (run.status === 'completed') {
-        // all conclusions besides success or skipped are considered failures
-        return run.conclusion !== 'success' && run.conclusion !== 'skipped';
+        // conclusions not in the success list are considered failures
+        return !successConclusions.includes(run.conclusion || '');
     }
     // run is still queued or pending
     return false;
