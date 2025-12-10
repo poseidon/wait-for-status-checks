@@ -1,6 +1,6 @@
 {
   "name": "wait-for-status-checks",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "description": "Typescript GitHub Action for waiting for status checks",
   "main": "lib/main.js",
@@ -25,7 +25,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.10.1",
+    "@actions/core": "^2.0.0",
     "@actions/github": "^6.0.0"
   },
   "devDependencies": {
