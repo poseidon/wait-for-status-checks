@@ -12,9 +12,13 @@ export interface Config {
   // frequency and timeout
   intervalSeconds: number
   timeoutSeconds: number
+  timeoutBehavior: 'fail' | 'success'
 
   // ignore
   ignoreChecks: string[]
+
+  // success criteria
+  successConclusions: string[]
 
   matchPattern?: string
   ignorePattern?: string
@@ -28,7 +32,9 @@ export async function poll(config: Config): Promise<void> {
     ref,
     intervalSeconds,
     timeoutSeconds,
+    timeoutBehavior,
     ignoreChecks,
+    successConclusions,
     matchPattern,
     ignorePattern
   } = config
@@ -110,11 +116,14 @@ export async function poll(config: Config): Promise<void> {
 
       // exit immediately if any runs completed without success (skipped counts as success)
       const failed = check_runs.filter(run =>
-        isFailure({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion
-        })
+        isFailure(
+          {
+            name: run.name,
+            status: run.status,
+            conclusion: run.conclusion
+          },
+          successConclusions
+        )
       )
       if (failed.length > 0) {
         core.info('One or more watched check runs were not successful')
@@ -151,9 +160,25 @@ export async function poll(config: Config): Promise<void> {
     await wait(intervalSeconds * 1000)
   }
 
-  core.setFailed(
-    `elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`
-  )
+  // Handle timeout based on configured behavior
+  core.info(`Timeout reached after ${elapsedSeconds} seconds`)
+
+  switch (timeoutBehavior) {
+    case 'fail':
+      core.setFailed(
+        `elapsed time ${elapsedSeconds} exceeds timeout ${timeoutSeconds}`
+      )
+      break
+
+    case 'success':
+      core.info(
+        'Timeout behavior set to "success" - treating timeout as successful completion'
+      )
+      break
+
+    default:
+      core.setFailed(`Unknown timeout behavior: ${timeoutBehavior}`)
+  }
 }
 
 function filterLatestCheckRunResults(
@@ -180,10 +205,10 @@ function filterLatestCheckRunResults(
   )
 }
 
-function isFailure(run: CheckRun): boolean {
+function isFailure(run: CheckRun, successConclusions: string[]): boolean {
   if (run.status === 'completed') {
-    // all conclusions besides success or skipped are considered failures
-    return run.conclusion !== 'success' && run.conclusion !== 'skipped'
+    // conclusions not in the success list are considered failures
+    return !successConclusions.includes(run.conclusion || '')
   }
   // run is still queued or pending
   return false
