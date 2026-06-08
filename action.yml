@@ -20,6 +20,12 @@ inputs:
     description: 'Regex match GitHub checks that should be ignored'
   ignore:
     description: 'GitHub checks that should be ignored (default ignores the current job)'
+  success_conclusions:
+    description: 'Comma-separated list of conclusion states that should be considered successful'
+    default: 'success,skipped'
+  timeout_behavior:
+    description: 'Behavior when timeout is reached: fail (default), success'
+    default: 'fail'
 runs:
   using: 'node20'
   main: 'dist/index.js'
