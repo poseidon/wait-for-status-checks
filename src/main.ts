@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Context} from '@actions/github/lib/context'
 import {poll} from './poll'
 import {wait} from './wait'
 
@@ -45,7 +44,7 @@ async function run(): Promise<void> {
   }
 }
 
-function pickSHA(context: Context): string {
+function pickSHA(context: typeof github.context): string {
   switch (context.eventName) {
     case 'pull_request':
     case 'pull_request_target':
