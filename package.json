@@ -1,6 +1,6 @@
 {
   "name": "wait-for-status-checks",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "description": "Typescript GitHub Action for waiting for status checks",
   "main": "lib/main.js",
@@ -40,7 +40,7 @@
     "eslint-plugin-prettier": "^5.1.3",
     "globals": "^17.6.0",
     "jest": "^30.0.4",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.0.0",
     "prettier": "^3.5.1",
     "ts-jest": "^29.1.2",
     "typescript": "^6.0.3"
